@@ -9,11 +9,11 @@
 
     :root {
       --bg:           #111111;
-      --panel:        #1c1c1c;
-      --border:       rgba(255,255,255,0.1);
-      --border-hover: rgba(255,255,255,0.28);
+      --panel:        #1e1e1e;
+      --border:       rgba(255,255,255,0.15);
+      --border-hover: rgba(255,255,255,0.35);
       --text:         #ffffff;
-      --muted:        #555555;
+      --muted:        #999999;
     }
 
     body {
@@ -96,12 +96,12 @@
       width: 100%;
       max-width: 800px;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      grid-template-columns: repeat(3, 1fr);
       gap: 12px;
     }
 
     .control-group {
-      background: transparent;
+      background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 6px;
       padding: 16px;
@@ -139,8 +139,8 @@
       min-width: 38px;
       text-align: right;
       font-size: 0.85rem;
-      color: rgba(255,255,255,0.6);
-      font-weight: 400;
+      color: rgba(255,255,255,0.85);
+      font-weight: 500;
     }
 
     .toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
@@ -239,8 +239,8 @@
     #countdown.active { display: flex; }
     #countdown.fade   { animation: cd-fade 0.35s ease-out forwards; }
     @keyframes cd-fade {
-      from { opacity: 1; transform: scale(1); }
-      to   { opacity: 0; transform: scale(1.25); }
+      from { color: rgba(255,255,255,0.85); }
+      to   { color: rgba(255,255,255,0); }
     }
 
     #scroll-area {
