@@ -8,24 +8,45 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #080808;
-      --panel: #0d000a;
-      --border: rgba(110,0,80,0.3);
-      --border-hover: rgba(110,0,80,0.6);
-      --accent: #6e0052;
-      --accent-dim: rgba(110,0,82,0.15);
-      --text: #f0f0f0;
-      --muted: #777;
+      --bg:           #111111;
+      --panel:        #1c1c1c;
+      --border:       rgba(255,255,255,0.1);
+      --border-hover: rgba(255,255,255,0.28);
+      --text:         #ffffff;
+      --muted:        #555555;
     }
 
     body {
-      font-family: system-ui, sans-serif;
+      font-family: system-ui, -apple-system, sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      border-top: 4px solid var(--accent);
+    }
+
+    /* ── HEADER ── */
+    #site-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 32px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    #logo {
+      height: 52px;
+      width: auto;
+      display: block;
+    }
+
+    #app-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
     }
 
     /* ── SETUP SCREEN ── */
@@ -33,18 +54,10 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 40px 20px;
+      padding: 36px 20px 48px;
       gap: 20px;
       flex: 1;
     }
-
-    #setup h1 {
-      font-size: 1.6rem;
-      font-weight: 600;
-      letter-spacing: 0.05em;
-      color: var(--accent);
-    }
-    #setup h1 span { color: var(--muted); font-weight: 400; font-size: 1rem; }
 
     .textarea-wrap {
       width: 100%;
@@ -52,10 +65,10 @@
     }
     #text-input {
       width: 100%;
-      min-height: 260px;
+      min-height: 240px;
       background: var(--panel);
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: 6px;
       color: var(--text);
       font-size: 1.1rem;
       line-height: 1.7;
@@ -65,42 +78,41 @@
       transition: border-color 0.2s;
       display: block;
     }
-    #text-input:focus { border-color: var(--accent); }
+    #text-input:focus     { border-color: rgba(255,255,255,0.4); }
     #text-input::placeholder { color: var(--muted); }
-    #text-input.drag-over { border-color: var(--accent); background: #1a001a; }
-
+    #text-input.drag-over { border-color: rgba(255,255,255,0.4); background: #222; }
 
     #read-time {
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       color: var(--muted);
       text-align: right;
       width: 100%;
       max-width: 800px;
       margin-top: -8px;
     }
-    #read-time strong { color: var(--accent); }
+    #read-time strong { color: rgba(255,255,255,0.75); font-weight: 500; }
 
     .controls-grid {
       width: 100%;
       max-width: 800px;
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-      gap: 14px;
+      gap: 12px;
     }
 
     .control-group {
       background: transparent;
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: 6px;
       padding: 16px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
     }
     .control-group label {
-      font-size: 0.78rem;
+      font-size: 0.68rem;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.12em;
       color: var(--muted);
     }
 
@@ -109,83 +121,84 @@
     input[type=range] {
       flex: 1;
       -webkit-appearance: none;
-      height: 4px;
-      background: var(--border);
-      border-radius: 2px;
+      height: 1px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 1px;
       outline: none;
       cursor: pointer;
     }
     input[type=range]::-webkit-slider-thumb {
       -webkit-appearance: none;
-      width: 18px; height: 18px;
+      width: 14px; height: 14px;
       border-radius: 50%;
-      background: var(--accent);
+      background: #fff;
       cursor: pointer;
     }
 
     .val {
       min-width: 38px;
       text-align: right;
-      font-size: 0.9rem;
-      color: var(--accent);
-      font-weight: 600;
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.6);
+      font-weight: 400;
     }
 
-    .toggle-row { display: flex; align-items: center; justify-content: space-between; }
-    .toggle { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .toggle { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
     .toggle input { opacity: 0; width: 0; height: 0; }
     .toggle-slider {
       position: absolute; inset: 0;
-      background: var(--border);
-      border-radius: 24px;
+      background: rgba(255,255,255,0.12);
+      border-radius: 22px;
       cursor: pointer;
       transition: background 0.2s;
     }
     .toggle-slider::before {
       content: '';
       position: absolute;
-      width: 18px; height: 18px;
+      width: 16px; height: 16px;
       left: 3px; top: 3px;
-      background: #fff;
+      background: rgba(255,255,255,0.5);
       border-radius: 50%;
-      transition: transform 0.2s;
+      transition: transform 0.2s, background 0.2s;
     }
-    .toggle input:checked + .toggle-slider { background: var(--accent); }
-    .toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
+    .toggle input:checked + .toggle-slider { background: rgba(255,255,255,0.25); }
+    .toggle input:checked + .toggle-slider::before { transform: translateX(18px); background: #fff; }
 
     /* Text colour picker */
     .colour-options { display: flex; gap: 8px; }
     .colour-btn {
       flex: 1;
-      padding: 8px 4px;
-      border-radius: 6px;
-      border: 1px solid rgba(255,255,255,0.12);
+      padding: 7px 4px;
+      border-radius: 4px;
+      border: 1px solid rgba(255,255,255,0.1);
       background: transparent;
-      font-size: 0.82rem;
-      font-weight: 600;
+      font-size: 0.78rem;
+      font-weight: 500;
       cursor: pointer;
-      transition: border-color 0.15s, opacity 0.15s;
+      transition: border-color 0.15s;
       color: var(--c, #fff);
     }
-    .colour-btn:hover  { border-color: var(--c, #fff); opacity: 0.85; }
+    .colour-btn:hover  { border-color: var(--c, rgba(255,255,255,0.4)); }
     .colour-btn.active { border-color: var(--c, #fff); border-width: 2px; }
 
     #start-btn {
       width: 100%;
       max-width: 800px;
-      padding: 18px;
+      padding: 16px;
       background: transparent;
-      color: #fff;
-      border: 1px solid var(--accent);
-      border-radius: 10px;
-      font-size: 1.15rem;
-      font-weight: 600;
+      color: rgba(255,255,255,0.85);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: 500;
       cursor: pointer;
-      letter-spacing: 0.06em;
-      transition: background 0.2s, transform 0.1s;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.1s;
     }
-    #start-btn:hover  { background: var(--accent-dim); }
-    #start-btn:active { transform: scale(0.98); }
+    #start-btn:hover  { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.5); color: #fff; }
+    #start-btn:active { transform: scale(0.99); }
 
     /* ── PROMPTER SCREEN ── */
     #prompter {
@@ -197,11 +210,9 @@
       overflow: hidden;
     }
 
-    /* Tap-to-pause flash */
     #tap-flash {
-      position: absolute;
-      inset: 0;
-      background: rgba(255,255,255,0.04);
+      position: absolute; inset: 0;
+      background: rgba(255,255,255,0.03);
       z-index: 6;
       pointer-events: none;
       opacity: 0;
@@ -212,25 +223,24 @@
       100% { opacity: 0; }
     }
 
-    /* Countdown overlay */
     #countdown {
       display: none;
-      position: absolute;
-      inset: 0;
+      position: absolute; inset: 0;
       align-items: center;
       justify-content: center;
       z-index: 50;
       font-size: 18rem;
       font-weight: 700;
-      color: var(--accent);
+      color: rgba(255,255,255,0.85);
       letter-spacing: -0.05em;
       pointer-events: none;
+      background: #000;
     }
     #countdown.active { display: flex; }
-    #countdown.fade { animation: cd-fade 0.35s ease-out forwards; }
+    #countdown.fade   { animation: cd-fade 0.35s ease-out forwards; }
     @keyframes cd-fade {
       from { opacity: 1; transform: scale(1); }
-      to   { opacity: 0; transform: scale(1.3); }
+      to   { opacity: 0; transform: scale(1.25); }
     }
 
     #scroll-area {
@@ -259,7 +269,6 @@
       text-align: center;
     }
 
-    /* gradient fade edges */
     #scroll-area::before,
     #scroll-area::after {
       content: '';
@@ -272,29 +281,27 @@
     #scroll-area::before { top: 0;    background: linear-gradient(to bottom, #000, transparent); }
     #scroll-area::after  { bottom: 0; background: linear-gradient(to top,    #000, transparent); }
 
-    /* Progress bar */
     #progress-track {
       position: absolute;
       right: 0; top: 0; bottom: 0;
-      width: 5px;
-      background: rgba(139,0,98,0.12);
+      width: 2px;
+      background: rgba(255,255,255,0.07);
       z-index: 4;
     }
     #progress-fill {
       width: 100%;
       height: 0%;
-      background: var(--accent);
-      border-radius: 0 0 3px 3px;
+      background: rgba(255,255,255,0.5);
     }
 
     /* ── CONTROL BAR ── */
     #control-bar {
-      background: rgba(10,0,5,0.96);
-      border-top: 1px solid var(--border);
+      background: rgba(10,10,10,0.97);
+      border-top: 1px solid rgba(255,255,255,0.08);
       padding: 10px 16px;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       flex-wrap: nowrap;
       overflow-x: auto;
       z-index: 10;
@@ -304,65 +311,74 @@
 
     .bar-btn {
       background: transparent;
-      border: 1px solid var(--border);
-      color: rgba(255,255,255,0.75);
-      border-radius: 8px;
-      padding: 8px 14px;
+      border: 1px solid rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.6);
+      border-radius: 4px;
+      padding: 7px 13px;
       cursor: pointer;
-      font-size: 0.9rem;
+      font-size: 0.82rem;
       font-weight: 500;
       white-space: nowrap;
       transition: border-color 0.15s, color 0.15s, background 0.15s;
     }
-    .bar-btn:hover  { border-color: var(--border-hover); color: #fff; }
-    .bar-btn.active { border-color: var(--accent); background: var(--accent-dim); color: #fff; }
+    .bar-btn:hover  { border-color: rgba(255,255,255,0.3); color: #fff; }
+    .bar-btn.active { border-color: rgba(255,255,255,0.55); background: rgba(255,255,255,0.07); color: #fff; }
 
-    .bar-sep { width: 1px; height: 28px; background: var(--border); flex-shrink: 0; }
+    .bar-sep { width: 1px; height: 24px; background: rgba(255,255,255,0.1); flex-shrink: 0; }
 
     .bar-slider-group {
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 0.78rem;
+      font-size: 0.7rem;
       color: var(--muted);
       text-transform: uppercase;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.08em;
       white-space: nowrap;
     }
     .bar-slider-group input[type=range] { width: 80px; }
-    .bar-slider-group .val { min-width: 28px; }
+    .bar-slider-group .val { min-width: 26px; }
 
     #exit-btn {
       margin-left: auto;
       background: transparent;
-      border: 1px solid rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.08);
       color: var(--muted);
-      border-radius: 8px;
-      padding: 8px 14px;
+      border-radius: 4px;
+      padding: 7px 13px;
       cursor: pointer;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       white-space: nowrap;
       transition: color 0.15s, border-color 0.15s;
     }
-    #exit-btn:hover { color: #fff; border-color: rgba(255,255,255,0.3); }
+    #exit-btn:hover { color: #fff; border-color: rgba(255,255,255,0.25); }
 
     #hint {
       position: fixed;
-      top: 16px; right: 16px;
-      font-size: 0.72rem;
-      color: rgba(255,255,255,0.2);
+      top: 14px; right: 16px;
+      font-size: 0.68rem;
+      color: rgba(255,255,255,0.18);
       z-index: 20;
       text-align: right;
-      line-height: 1.7;
+      line-height: 1.8;
       pointer-events: none;
     }
   </style>
 </head>
 <body>
 
+<!-- ══ HEADER ══ -->
+<header id="site-header">
+  <img
+    id="logo"
+    src="https://media.digistormhosting.com.au/h-au-vic-321-website/content/logos/02_Haileybury_WordmarkCrest-Landscape-RendallSchool_White.svg?v=1632136068"
+    alt="Haileybury Rendall School"
+  >
+  <span id="app-label">Teleprompter</span>
+</header>
+
 <!-- ══ SETUP SCREEN ══ -->
 <div id="setup">
-  <h1>Teleprompter <span>— Haileybury Rendall School</span></h1>
 
   <div class="textarea-wrap">
     <textarea id="text-input" placeholder="Paste or type your script here… or drag and drop a .txt file" spellcheck="true"></textarea>
@@ -408,7 +424,7 @@
     <div class="control-group">
       <label>Bold Text</label>
       <div class="toggle-row">
-        <span style="font-size:0.88rem; color:#aaa;">Easier to read on camera</span>
+        <span style="font-size:0.85rem; color:#777;">Easier to read on camera</span>
         <label class="toggle">
           <input type="checkbox" id="bold" checked>
           <span class="toggle-slider"></span>
@@ -419,7 +435,7 @@
     <div class="control-group">
       <label>Mirror Text</label>
       <div class="toggle-row">
-        <span style="font-size:0.88rem; color:#aaa;">Flip for teleprompter glass</span>
+        <span style="font-size:0.85rem; color:#777;">Flip for teleprompter glass</span>
         <label class="toggle">
           <input type="checkbox" id="mirror">
           <span class="toggle-slider"></span>
@@ -481,7 +497,6 @@
 </div>
 
 <script>
-  // ── Elements ──
   const setup         = document.getElementById('setup');
   const prompter      = document.getElementById('prompter');
   const textInput     = document.getElementById('text-input');
@@ -503,7 +518,6 @@
   const readTimeEl    = document.getElementById('read-time');
   const hint          = document.getElementById('hint');
 
-  // ── State ──
   let scrollPos       = 0;
   let playing         = false;
   let rafId           = null;
@@ -523,7 +537,6 @@
   ];
   let colourIdx = 0;
 
-  // Setup colour picker
   document.querySelectorAll('.colour-btn').forEach((btn, i) => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.colour-btn').forEach(b => b.classList.remove('active'));
@@ -532,8 +545,6 @@
       textInput.style.color = COLOURS[i].value;
     });
   });
-
-  // Set initial textarea colour to match default (White)
   textInput.style.color = COLOURS[0].value;
 
   function applyColour() {
@@ -542,7 +553,6 @@
     colourBtn.textContent  = '● ' + c.name;
     colourBtn.style.color  = c.value;
   }
-
   colourBtn.addEventListener('click', () => {
     colourIdx = (colourIdx + 1) % COLOURS.length;
     applyColour();
@@ -550,23 +560,19 @@
 
   // ── Reading time ──
   function wpmForSpeed(s) { return 75 + (s - 1) * 14; }
-
-  function formatDuration(seconds) {
-    if (seconds < 60) return `${Math.round(seconds)}s`;
-    const m = Math.floor(seconds / 60);
-    const s = Math.round(seconds % 60);
+  function formatDuration(sec) {
+    if (sec < 60) return `${Math.round(sec)}s`;
+    const m = Math.floor(sec / 60), s = Math.round(sec % 60);
     return s > 0 ? `${m}m ${s}s` : `${m}m`;
   }
-
   function updateReadTime() {
     const text  = textInput.value.trim();
     const words = text ? text.split(/\s+/).filter(Boolean).length : 0;
     const speed = parseInt(document.getElementById('speed').value, 10);
     if (words === 0) { readTimeEl.innerHTML = '—'; return; }
     const secs = Math.round((words / wpmForSpeed(speed)) * 60);
-    readTimeEl.innerHTML = `<strong>${words}</strong> words &nbsp;·&nbsp; Est. read time at this speed: <strong>${formatDuration(secs)}</strong>`;
+    readTimeEl.innerHTML = `<strong>${words}</strong> words &nbsp;·&nbsp; Est. read time: <strong>${formatDuration(secs)}</strong>`;
   }
-
   textInput.addEventListener('input', updateReadTime);
   document.getElementById('speed').addEventListener('input', updateReadTime);
 
@@ -576,19 +582,18 @@
     const vl = document.getElementById(valId);
     sl.addEventListener('input', () => { vl.textContent = sl.value + suffix; });
   }
-  linkSlider('speed',    'speed-val',    '');
+  linkSlider('speed', 'speed-val', '');
 
   document.getElementById('fontsize').addEventListener('input', function () {
     document.getElementById('fontsize-val').textContent = this.value + 'px';
     textInput.style.fontSize = this.value + 'px';
   });
-
   document.getElementById('width').addEventListener('input', function () {
     document.getElementById('width-val').textContent = this.value + '%';
     textInput.style.width = this.value + '%';
   });
 
-  // ── Prompter-bar sliders ──
+  // ── Prompter sliders ──
   function pSlider(id, valId, suffix, fn) {
     const el = document.getElementById(id);
     const vl = document.getElementById(valId);
@@ -598,7 +603,7 @@
   pSlider('p-fontsize', 'p-fontsize-val', 'px', v => { promptText.style.fontSize = v + 'px'; });
   pSlider('p-width',    'p-width-val',    '%',  v => { promptText.style.width    = v + '%'; });
 
-  // ── Drag-and-drop .txt ──
+  // ── Drag-and-drop ──
   textInput.addEventListener('dragover',  e => { e.preventDefault(); textInput.classList.add('drag-over'); });
   textInput.addEventListener('dragleave', ()  => textInput.classList.remove('drag-over'));
   textInput.addEventListener('drop', e => {
@@ -611,7 +616,7 @@
     reader.readAsText(file);
   });
 
-  // ── Toggles (setup) ──
+  // ── Toggles ──
   document.getElementById('bold').addEventListener('change',   e => { isBold   = e.target.checked; });
   document.getElementById('mirror').addEventListener('change', e => { mirrored = e.target.checked; });
 
@@ -652,14 +657,13 @@
 
     setup.style.display    = 'none';
     prompter.style.display = 'flex';
-
     startCountdown();
   }
 
   // ── Countdown ──
   function startCountdown() {
     let n = 3;
-    countdownActive    = true;
+    countdownActive = true;
     countdownEl.textContent = n;
     countdownEl.classList.add('active');
     countdownEl.classList.remove('fade');
@@ -682,25 +686,23 @@
     }, 1000);
   }
 
-  // ── Tap anywhere on scroll area to play/pause ──
+  // ── Tap to play/pause ──
   scrollArea.addEventListener('click', () => {
     if (countdownActive) return;
     setPlaying(!playing);
-    // Brief flash feedback
     tapFlash.classList.remove('flash');
-    void tapFlash.offsetWidth; // reflow to restart animation
+    void tapFlash.offsetWidth;
     tapFlash.classList.add('flash');
   });
 
-  // ── Scroll back ──
+  // ── Rewind ──
   function rewind() {
-    const jumpPx = Math.max(150, speedPx() * 60 * 3); // ~3 seconds worth
+    const jumpPx = Math.max(150, speedPx() * 60 * 3);
     scrollPos = Math.max(0, scrollPos - jumpPx);
     scrollContent.style.transform = `translateY(${-scrollPos}px)`;
     const maxScroll = scrollContent.offsetHeight - scrollArea.offsetHeight;
     progressFill.style.height = `${maxScroll > 0 ? (scrollPos / maxScroll) * 100 : 0}%`;
   }
-
   backBtn.addEventListener('click', rewind);
 
   // ── Scroll loop ──
@@ -719,10 +721,7 @@
     scrollPos      += px;
     const maxScroll = scrollContent.offsetHeight - scrollArea.offsetHeight;
 
-    if (scrollPos >= maxScroll) {
-      scrollPos = maxScroll;
-      setPlaying(false);
-    }
+    if (scrollPos >= maxScroll) { scrollPos = maxScroll; setPlaying(false); }
 
     scrollContent.style.transform = `translateY(${-scrollPos}px)`;
     progressFill.style.height     = `${maxScroll > 0 ? (scrollPos / maxScroll) * 100 : 0}%`;
@@ -750,7 +749,7 @@
     countdownEl.classList.remove('active', 'fade');
     countdownActive = false;
     setPlaying(false);
-    scrollPos                     = 0;
+    scrollPos = 0;
     scrollContent.style.transform = 'translateY(0)';
     progressFill.style.height     = '0%';
   });
@@ -779,7 +778,7 @@
     mirrorBtn.classList.toggle('active', mirrored);
   }
 
-  // ── Hide controls on inactivity ──
+  // ── Hide controls ──
   function scheduleHideControls() {
     clearTimeout(hideTimer);
     hideTimer = setTimeout(() => {
@@ -794,47 +793,28 @@
     controlsVisible    = true;
     scheduleHideControls();
   }
-
-  prompter.addEventListener('mousemove', showControls);
+  prompter.addEventListener('mousemove',  showControls);
   prompter.addEventListener('touchstart', showControls);
 
-  // ── Keyboard shortcuts ──
+  // ── Keyboard ──
   document.addEventListener('keydown', e => {
     if (prompter.style.display !== 'flex') return;
     showControls();
     switch (e.key) {
-      case ' ':
-        e.preventDefault();
-        if (!countdownActive) setPlaying(!playing);
-        break;
-      case 'ArrowUp':
-        e.preventDefault();
-        nudgeSpeed(1);
-        break;
-      case 'ArrowDown':
-        e.preventDefault();
-        nudgeSpeed(-1);
-        break;
-      case 'ArrowLeft':
-        e.preventDefault();
-        rewind();
-        break;
-      case 'f': case 'F':
-        toggleFullscreen();
-        break;
+      case ' ':         e.preventDefault(); if (!countdownActive) setPlaying(!playing); break;
+      case 'ArrowUp':   e.preventDefault(); nudgeSpeed(1);  break;
+      case 'ArrowDown': e.preventDefault(); nudgeSpeed(-1); break;
+      case 'ArrowLeft': e.preventDefault(); rewind();       break;
+      case 'f': case 'F': toggleFullscreen(); break;
       case 'h': case 'H':
         if (controlsVisible) {
           controlBar.classList.add('hidden');
           hint.style.opacity = '0';
           controlsVisible    = false;
           clearTimeout(hideTimer);
-        } else {
-          showControls();
-        }
+        } else { showControls(); }
         break;
-      case 'Escape':
-        if (!document.fullscreenElement) exitBtn.click();
-        break;
+      case 'Escape': if (!document.fullscreenElement) exitBtn.click(); break;
     }
   });
 
@@ -845,7 +825,6 @@
     document.getElementById('p-speed-val').textContent = val;
   }
 
-  // ── Fullscreen ──
   function toggleFullscreen() {
     if (!document.fullscreenElement) prompter.requestFullscreen().catch(() => {});
     else document.exitFullscreen();
