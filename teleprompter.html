@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teleprompter — Haileybury Rendall</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #080808;
+      --panel: #0d000a;
+      --border: rgba(110,0,80,0.3);
+      --border-hover: rgba(110,0,80,0.6);
+      --accent: #6e0052;
+      --accent-dim: rgba(110,0,82,0.15);
+      --text: #f0f0f0;
+      --muted: #777;
+    }
+
+    body {
+      font-family: system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      border-top: 4px solid var(--accent);
+    }
+
+    /* ── SETUP SCREEN ── */
+    #setup {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+      gap: 20px;
+      flex: 1;
+    }
+
+    #setup h1 {
+      font-size: 1.6rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+    }
+    #setup h1 span { color: var(--muted); font-weight: 400; font-size: 1rem; }
+
+    .textarea-wrap {
+      width: 100%;
+      max-width: 800px;
+    }
+    #text-input {
+      width: 100%;
+      min-height: 260px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 1.1rem;
+      line-height: 1.7;
+      padding: 20px;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s;
+      display: block;
+    }
+    #text-input:focus { border-color: var(--accent); }
+    #text-input::placeholder { color: var(--muted); }
+    #text-input.drag-over { border-color: var(--accent); background: #1a001a; }
+
+
+    #read-time {
+      font-size: 0.82rem;
+      color: var(--muted);
+      text-align: right;
+      width: 100%;
+      max-width: 800px;
+      margin-top: -8px;
+    }
+    #read-time strong { color: var(--accent); }
+
+    .controls-grid {
+      width: 100%;
+      max-width: 800px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 14px;
+    }
+
+    .control-group {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .control-group label {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .control-row { display: flex; align-items: center; gap: 12px; }
+
+    input[type=range] {
+      flex: 1;
+      -webkit-appearance: none;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+    }
+
+    .val {
+      min-width: 38px;
+      text-align: right;
+      font-size: 0.9rem;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; }
+    .toggle { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; inset: 0;
+      background: var(--border);
+      border-radius: 24px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 18px; height: 18px;
+      left: 3px; top: 3px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+    .toggle input:checked + .toggle-slider { background: var(--accent); }
+    .toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+    /* Text colour picker */
+    .colour-options { display: flex; gap: 8px; }
+    .colour-btn {
+      flex: 1;
+      padding: 8px 4px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: transparent;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.15s, opacity 0.15s;
+      color: var(--c, #fff);
+    }
+    .colour-btn:hover  { border-color: var(--c, #fff); opacity: 0.85; }
+    .colour-btn.active { border-color: var(--c, #fff); border-width: 2px; }
+
+    #start-btn {
+      width: 100%;
+      max-width: 800px;
+      padding: 18px;
+      background: transparent;
+      color: #fff;
+      border: 1px solid var(--accent);
+      border-radius: 10px;
+      font-size: 1.15rem;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 0.06em;
+      transition: background 0.2s, transform 0.1s;
+    }
+    #start-btn:hover  { background: var(--accent-dim); }
+    #start-btn:active { transform: scale(0.98); }
+
+    /* ── PROMPTER SCREEN ── */
+    #prompter {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: #000;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Tap-to-pause flash */
+    #tap-flash {
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0.04);
+      z-index: 6;
+      pointer-events: none;
+      opacity: 0;
+    }
+    #tap-flash.flash { animation: tap-anim 0.25s ease-out forwards; }
+    @keyframes tap-anim {
+      0%   { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    /* Countdown overlay */
+    #countdown {
+      display: none;
+      position: absolute;
+      inset: 0;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      font-size: 18rem;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: -0.05em;
+      pointer-events: none;
+    }
+    #countdown.active { display: flex; }
+    #countdown.fade { animation: cd-fade 0.35s ease-out forwards; }
+    @keyframes cd-fade {
+      from { opacity: 1; transform: scale(1); }
+      to   { opacity: 0; transform: scale(1.3); }
+    }
+
+    #scroll-area {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      position: relative;
+      cursor: pointer;
+    }
+
+    #scroll-content {
+      position: absolute;
+      top: 0;
+      width: 100%;
+      padding: 50vh 0;
+      display: flex;
+      justify-content: center;
+    }
+
+    #prompt-text {
+      line-height: 1.55;
+      color: #fff;
+      white-space: pre-wrap;
+      word-break: break-word;
+      text-align: center;
+    }
+
+    /* gradient fade edges */
+    #scroll-area::before,
+    #scroll-area::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0;
+      height: 18%;
+      z-index: 2;
+      pointer-events: none;
+    }
+    #scroll-area::before { top: 0;    background: linear-gradient(to bottom, #000, transparent); }
+    #scroll-area::after  { bottom: 0; background: linear-gradient(to top,    #000, transparent); }
+
+    /* Progress bar */
+    #progress-track {
+      position: absolute;
+      right: 0; top: 0; bottom: 0;
+      width: 5px;
+      background: rgba(139,0,98,0.12);
+      z-index: 4;
+    }
+    #progress-fill {
+      width: 100%;
+      height: 0%;
+      background: var(--accent);
+      border-radius: 0 0 3px 3px;
+    }
+
+    /* ── CONTROL BAR ── */
+    #control-bar {
+      background: rgba(10,0,5,0.96);
+      border-top: 1px solid var(--border);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      z-index: 10;
+      transition: opacity 0.4s;
+    }
+    #control-bar.hidden { opacity: 0; pointer-events: none; }
+
+    .bar-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: rgba(255,255,255,0.75);
+      border-radius: 8px;
+      padding: 8px 14px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      white-space: nowrap;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+    .bar-btn:hover  { border-color: var(--border-hover); color: #fff; }
+    .bar-btn.active { border-color: var(--accent); background: var(--accent-dim); color: #fff; }
+
+    .bar-sep { width: 1px; height: 28px; background: var(--border); flex-shrink: 0; }
+
+    .bar-slider-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+    }
+    .bar-slider-group input[type=range] { width: 80px; }
+    .bar-slider-group .val { min-width: 28px; }
+
+    #exit-btn {
+      margin-left: auto;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--muted);
+      border-radius: 8px;
+      padding: 8px 14px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      white-space: nowrap;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    #exit-btn:hover { color: #fff; border-color: rgba(255,255,255,0.3); }
+
+    #hint {
+      position: fixed;
+      top: 16px; right: 16px;
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.2);
+      z-index: 20;
+      text-align: right;
+      line-height: 1.7;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ SETUP SCREEN ══ -->
+<div id="setup">
+  <h1>Teleprompter <span>— Haileybury Rendall School</span></h1>
+
+  <div class="textarea-wrap">
+    <textarea id="text-input" placeholder="Paste or type your script here… or drag and drop a .txt file" spellcheck="true"></textarea>
+  </div>
+
+  <div id="read-time">—</div>
+
+  <div class="controls-grid">
+
+    <div class="control-group">
+      <label>Scroll Speed</label>
+      <div class="control-row">
+        <input type="range" id="speed" min="1" max="10" value="4" step="1">
+        <span class="val" id="speed-val">4</span>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label>Font Size</label>
+      <div class="control-row">
+        <input type="range" id="fontsize" min="24" max="96" value="48" step="2">
+        <span class="val" id="fontsize-val">48px</span>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label>Text Width</label>
+      <div class="control-row">
+        <input type="range" id="width" min="30" max="100" value="70" step="5">
+        <span class="val" id="width-val">70%</span>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label>Text Colour</label>
+      <div class="colour-options">
+        <button class="colour-btn active" data-colour="#ffffff" style="--c:#ffffff">White</button>
+        <button class="colour-btn"        data-colour="#f5c518" style="--c:#f5c518">Amber</button>
+        <button class="colour-btn"        data-colour="#33cc77" style="--c:#33cc77">Green</button>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label>Bold Text</label>
+      <div class="toggle-row">
+        <span style="font-size:0.88rem; color:#aaa;">Easier to read on camera</span>
+        <label class="toggle">
+          <input type="checkbox" id="bold" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label>Mirror Text</label>
+      <div class="toggle-row">
+        <span style="font-size:0.88rem; color:#aaa;">Flip for teleprompter glass</span>
+        <label class="toggle">
+          <input type="checkbox" id="mirror">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+  </div>
+
+  <button id="start-btn">Start Teleprompter</button>
+</div>
+
+<!-- ══ PROMPTER SCREEN ══ -->
+<div id="prompter">
+
+  <div id="countdown"></div>
+  <div id="tap-flash"></div>
+
+  <div id="scroll-area">
+    <div id="scroll-content">
+      <div id="prompt-text"></div>
+    </div>
+    <div id="progress-track"><div id="progress-fill"></div></div>
+  </div>
+
+  <div id="control-bar">
+    <button class="bar-btn active" id="play-btn">▶ Play</button>
+    <button class="bar-btn"        id="back-btn">↩ Back</button>
+    <button class="bar-btn"        id="reset-btn">↺ Reset</button>
+
+    <div class="bar-sep"></div>
+
+    <div class="bar-slider-group">
+      Speed
+      <input type="range" id="p-speed" min="1" max="10" value="4" step="1">
+      <span class="val" id="p-speed-val">4</span>
+    </div>
+
+    <div class="bar-slider-group">
+      Size
+      <input type="range" id="p-fontsize" min="24" max="96" value="48" step="2">
+      <span class="val" id="p-fontsize-val">48px</span>
+    </div>
+
+    <div class="bar-slider-group">
+      Width
+      <input type="range" id="p-width" min="30" max="100" value="70" step="5">
+      <span class="val" id="p-width-val">70%</span>
+    </div>
+
+    <button class="bar-btn" id="colour-btn">● White</button>
+    <button class="bar-btn" id="bold-btn">B Bold</button>
+    <button class="bar-btn" id="mirror-btn">⇄ Mirror</button>
+
+    <button id="exit-btn">✕ Exit</button>
+  </div>
+
+  <div id="hint">Tap — play/pause&nbsp;&nbsp;Space — play/pause&nbsp;&nbsp;↑↓ — speed&nbsp;&nbsp;← — rewind&nbsp;&nbsp;F — fullscreen&nbsp;&nbsp;H — hide controls</div>
+</div>
+
+<script>
+  // ── Elements ──
+  const setup         = document.getElementById('setup');
+  const prompter      = document.getElementById('prompter');
+  const textInput     = document.getElementById('text-input');
+  const startBtn      = document.getElementById('start-btn');
+  const scrollArea    = document.getElementById('scroll-area');
+  const scrollContent = document.getElementById('scroll-content');
+  const promptText    = document.getElementById('prompt-text');
+  const controlBar    = document.getElementById('control-bar');
+  const playBtn       = document.getElementById('play-btn');
+  const backBtn       = document.getElementById('back-btn');
+  const resetBtn      = document.getElementById('reset-btn');
+  const exitBtn       = document.getElementById('exit-btn');
+  const mirrorBtn     = document.getElementById('mirror-btn');
+  const boldBtn       = document.getElementById('bold-btn');
+  const colourBtn     = document.getElementById('colour-btn');
+  const countdownEl   = document.getElementById('countdown');
+  const tapFlash      = document.getElementById('tap-flash');
+  const progressFill  = document.getElementById('progress-fill');
+  const readTimeEl    = document.getElementById('read-time');
+  const hint          = document.getElementById('hint');
+
+  // ── State ──
+  let scrollPos       = 0;
+  let playing         = false;
+  let rafId           = null;
+  let lastTime        = null;
+  let mirrored        = false;
+  let isBold          = true;
+  let controlsVisible = true;
+  let hideTimer       = null;
+  let countdownTimer  = null;
+  let countdownActive = false;
+
+  // ── Text colours ──
+  const COLOURS = [
+    { name: 'White', value: '#ffffff' },
+    { name: 'Amber', value: '#f5c518' },
+    { name: 'Green', value: '#33cc77' },
+  ];
+  let colourIdx = 0;
+
+  // Setup colour picker
+  document.querySelectorAll('.colour-btn').forEach((btn, i) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.colour-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      colourIdx = i;
+      textInput.style.color = COLOURS[i].value;
+    });
+  });
+
+  // Set initial textarea colour to match default (White)
+  textInput.style.color = COLOURS[0].value;
+
+  function applyColour() {
+    const c = COLOURS[colourIdx];
+    promptText.style.color = c.value;
+    colourBtn.textContent  = '● ' + c.name;
+    colourBtn.style.color  = c.value;
+  }
+
+  colourBtn.addEventListener('click', () => {
+    colourIdx = (colourIdx + 1) % COLOURS.length;
+    applyColour();
+  });
+
+  // ── Reading time ──
+  function wpmForSpeed(s) { return 75 + (s - 1) * 14; }
+
+  function formatDuration(seconds) {
+    if (seconds < 60) return `${Math.round(seconds)}s`;
+    const m = Math.floor(seconds / 60);
+    const s = Math.round(seconds % 60);
+    return s > 0 ? `${m}m ${s}s` : `${m}m`;
+  }
+
+  function updateReadTime() {
+    const text  = textInput.value.trim();
+    const words = text ? text.split(/\s+/).filter(Boolean).length : 0;
+    const speed = parseInt(document.getElementById('speed').value, 10);
+    if (words === 0) { readTimeEl.innerHTML = '—'; return; }
+    const secs = Math.round((words / wpmForSpeed(speed)) * 60);
+    readTimeEl.innerHTML = `<strong>${words}</strong> words &nbsp;·&nbsp; Est. read time at this speed: <strong>${formatDuration(secs)}</strong>`;
+  }
+
+  textInput.addEventListener('input', updateReadTime);
+  document.getElementById('speed').addEventListener('input', updateReadTime);
+
+  // ── Setup sliders ──
+  function linkSlider(id, valId, suffix) {
+    const sl = document.getElementById(id);
+    const vl = document.getElementById(valId);
+    sl.addEventListener('input', () => { vl.textContent = sl.value + suffix; });
+  }
+  linkSlider('speed',    'speed-val',    '');
+
+  document.getElementById('fontsize').addEventListener('input', function () {
+    document.getElementById('fontsize-val').textContent = this.value + 'px';
+    textInput.style.fontSize = this.value + 'px';
+  });
+
+  document.getElementById('width').addEventListener('input', function () {
+    document.getElementById('width-val').textContent = this.value + '%';
+    textInput.style.width = this.value + '%';
+  });
+
+  // ── Prompter-bar sliders ──
+  function pSlider(id, valId, suffix, fn) {
+    const el = document.getElementById(id);
+    const vl = document.getElementById(valId);
+    el.addEventListener('input', () => { vl.textContent = el.value + suffix; fn(el.value); });
+  }
+  pSlider('p-speed',    'p-speed-val',    '',   () => {});
+  pSlider('p-fontsize', 'p-fontsize-val', 'px', v => { promptText.style.fontSize = v + 'px'; });
+  pSlider('p-width',    'p-width-val',    '%',  v => { promptText.style.width    = v + '%'; });
+
+  // ── Drag-and-drop .txt ──
+  textInput.addEventListener('dragover',  e => { e.preventDefault(); textInput.classList.add('drag-over'); });
+  textInput.addEventListener('dragleave', ()  => textInput.classList.remove('drag-over'));
+  textInput.addEventListener('drop', e => {
+    e.preventDefault();
+    textInput.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => { textInput.value = ev.target.result; updateReadTime(); };
+    reader.readAsText(file);
+  });
+
+  // ── Toggles (setup) ──
+  document.getElementById('bold').addEventListener('change',   e => { isBold   = e.target.checked; });
+  document.getElementById('mirror').addEventListener('change', e => { mirrored = e.target.checked; });
+
+  // ── Launch ──
+  startBtn.addEventListener('click', launch);
+  textInput.addEventListener('keydown', e => { if (e.key === 'Enter' && e.ctrlKey) launch(); });
+
+  function launch() {
+    const text = textInput.value.trim();
+    if (!text) { textInput.focus(); return; }
+
+    const sp = document.getElementById('speed').value;
+    const fs = document.getElementById('fontsize').value;
+    const wd = document.getElementById('width').value;
+
+    document.getElementById('p-speed').value              = sp;
+    document.getElementById('p-speed-val').textContent    = sp;
+    document.getElementById('p-fontsize').value           = fs;
+    document.getElementById('p-fontsize-val').textContent = fs + 'px';
+    document.getElementById('p-width').value              = wd;
+    document.getElementById('p-width-val').textContent    = wd + '%';
+
+    isBold   = document.getElementById('bold').checked;
+    mirrored = document.getElementById('mirror').checked;
+
+    promptText.textContent      = text;
+    promptText.style.fontSize   = fs + 'px';
+    promptText.style.width      = wd + '%';
+    promptText.style.fontWeight = isBold ? '700' : '400';
+    boldBtn.classList.toggle('active', isBold);
+
+    applyColour();
+    applyMirror();
+
+    scrollPos = 0;
+    scrollContent.style.transform = 'translateY(0)';
+    progressFill.style.height     = '0%';
+
+    setup.style.display    = 'none';
+    prompter.style.display = 'flex';
+
+    startCountdown();
+  }
+
+  // ── Countdown ──
+  function startCountdown() {
+    let n = 3;
+    countdownActive    = true;
+    countdownEl.textContent = n;
+    countdownEl.classList.add('active');
+    countdownEl.classList.remove('fade');
+
+    countdownTimer = setInterval(() => {
+      countdownEl.classList.add('fade');
+      setTimeout(() => {
+        n--;
+        if (n <= 0) {
+          clearInterval(countdownTimer);
+          countdownEl.classList.remove('active', 'fade');
+          countdownActive = false;
+          setPlaying(true);
+          scheduleHideControls();
+        } else {
+          countdownEl.textContent = n;
+          countdownEl.classList.remove('fade');
+        }
+      }, 350);
+    }, 1000);
+  }
+
+  // ── Tap anywhere on scroll area to play/pause ──
+  scrollArea.addEventListener('click', () => {
+    if (countdownActive) return;
+    setPlaying(!playing);
+    // Brief flash feedback
+    tapFlash.classList.remove('flash');
+    void tapFlash.offsetWidth; // reflow to restart animation
+    tapFlash.classList.add('flash');
+  });
+
+  // ── Scroll back ──
+  function rewind() {
+    const jumpPx = Math.max(150, speedPx() * 60 * 3); // ~3 seconds worth
+    scrollPos = Math.max(0, scrollPos - jumpPx);
+    scrollContent.style.transform = `translateY(${-scrollPos}px)`;
+    const maxScroll = scrollContent.offsetHeight - scrollArea.offsetHeight;
+    progressFill.style.height = `${maxScroll > 0 ? (scrollPos / maxScroll) * 100 : 0}%`;
+  }
+
+  backBtn.addEventListener('click', rewind);
+
+  // ── Scroll loop ──
+  function speedPx() {
+    const v = parseInt(document.getElementById('p-speed').value, 10);
+    return 0.25 + (v - 1) * 0.36;
+  }
+
+  function tick(ts) {
+    if (!playing) return;
+    if (lastTime === null) lastTime = ts;
+    const delta = ts - lastTime;
+    lastTime = ts;
+
+    const px        = speedPx() * (delta / 16.67);
+    scrollPos      += px;
+    const maxScroll = scrollContent.offsetHeight - scrollArea.offsetHeight;
+
+    if (scrollPos >= maxScroll) {
+      scrollPos = maxScroll;
+      setPlaying(false);
+    }
+
+    scrollContent.style.transform = `translateY(${-scrollPos}px)`;
+    progressFill.style.height     = `${maxScroll > 0 ? (scrollPos / maxScroll) * 100 : 0}%`;
+    rafId = requestAnimationFrame(tick);
+  }
+
+  function setPlaying(state) {
+    playing = state;
+    if (state) {
+      lastTime = null;
+      rafId    = requestAnimationFrame(tick);
+      playBtn.textContent = '⏸ Pause';
+      playBtn.classList.add('active');
+    } else {
+      cancelAnimationFrame(rafId);
+      playBtn.textContent = '▶ Play';
+      playBtn.classList.remove('active');
+    }
+  }
+
+  playBtn.addEventListener('click', () => setPlaying(!playing));
+
+  resetBtn.addEventListener('click', () => {
+    clearInterval(countdownTimer);
+    countdownEl.classList.remove('active', 'fade');
+    countdownActive = false;
+    setPlaying(false);
+    scrollPos                     = 0;
+    scrollContent.style.transform = 'translateY(0)';
+    progressFill.style.height     = '0%';
+  });
+
+  exitBtn.addEventListener('click', () => {
+    clearInterval(countdownTimer);
+    countdownEl.classList.remove('active', 'fade');
+    countdownActive = false;
+    setPlaying(false);
+    prompter.style.display = 'none';
+    setup.style.display    = 'flex';
+    if (document.fullscreenElement) document.exitFullscreen();
+  });
+
+  // ── Bold ──
+  boldBtn.addEventListener('click', () => {
+    isBold = !isBold;
+    boldBtn.classList.toggle('active', isBold);
+    promptText.style.fontWeight = isBold ? '700' : '400';
+  });
+
+  // ── Mirror ──
+  mirrorBtn.addEventListener('click', () => { mirrored = !mirrored; applyMirror(); });
+  function applyMirror() {
+    promptText.style.transform = mirrored ? 'scaleX(-1)' : '';
+    mirrorBtn.classList.toggle('active', mirrored);
+  }
+
+  // ── Hide controls on inactivity ──
+  function scheduleHideControls() {
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(() => {
+      controlBar.classList.add('hidden');
+      hint.style.opacity = '0';
+      controlsVisible    = false;
+    }, 4000);
+  }
+  function showControls() {
+    controlBar.classList.remove('hidden');
+    hint.style.opacity = '1';
+    controlsVisible    = true;
+    scheduleHideControls();
+  }
+
+  prompter.addEventListener('mousemove', showControls);
+  prompter.addEventListener('touchstart', showControls);
+
+  // ── Keyboard shortcuts ──
+  document.addEventListener('keydown', e => {
+    if (prompter.style.display !== 'flex') return;
+    showControls();
+    switch (e.key) {
+      case ' ':
+        e.preventDefault();
+        if (!countdownActive) setPlaying(!playing);
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        nudgeSpeed(1);
+        break;
+      case 'ArrowDown':
+        e.preventDefault();
+        nudgeSpeed(-1);
+        break;
+      case 'ArrowLeft':
+        e.preventDefault();
+        rewind();
+        break;
+      case 'f': case 'F':
+        toggleFullscreen();
+        break;
+      case 'h': case 'H':
+        if (controlsVisible) {
+          controlBar.classList.add('hidden');
+          hint.style.opacity = '0';
+          controlsVisible    = false;
+          clearTimeout(hideTimer);
+        } else {
+          showControls();
+        }
+        break;
+      case 'Escape':
+        if (!document.fullscreenElement) exitBtn.click();
+        break;
+    }
+  });
+
+  function nudgeSpeed(dir) {
+    const sl  = document.getElementById('p-speed');
+    const val = Math.min(10, Math.max(1, parseInt(sl.value, 10) + dir));
+    sl.value  = val;
+    document.getElementById('p-speed-val').textContent = val;
+  }
+
+  // ── Fullscreen ──
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) prompter.requestFullscreen().catch(() => {});
+    else document.exitFullscreen();
+  }
+</script>
+</body>
+</html>
